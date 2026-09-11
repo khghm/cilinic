@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
+import { ClinicProvider } from './context/ClinicContext';
+import NotificationToast from './components/NotificationToast';
 import Dashboard from './components/Dashboard';
 import Appointments from './components/Appointments';
 import Patients from './components/Patients';
 import Billing from './components/Billing';
 import SMS from './components/SMS';
+import Reports from './components/Reports';
 import Settings from './components/Settings';
 
-type Page = 'dashboard' | 'appointments' | 'patients' | 'billing' | 'sms' | 'settings';
+type Page = 'dashboard' | 'appointments' | 'patients' | 'billing' | 'sms' | 'reports' | 'settings';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -19,6 +22,7 @@ const App: React.FC = () => {
     { id: 'patients' as Page, label: 'بیماران', icon: 'fa-users' },
     { id: 'billing' as Page, label: 'صورتحساب', icon: 'fa-file-invoice-dollar' },
     { id: 'sms' as Page, label: 'پیامک', icon: 'fa-comment-sms' },
+    { id: 'reports' as Page, label: 'گزارش‌ها', icon: 'fa-chart-bar' },
     { id: 'settings' as Page, label: 'تنظیمات', icon: 'fa-gear' },
   ];
 
@@ -29,13 +33,23 @@ const App: React.FC = () => {
       case 'patients': return <Patients />;
       case 'billing': return <Billing />;
       case 'sms': return <SMS />;
+      case 'reports': return <Reports />;
       case 'settings': return <Settings />;
       default: return <Dashboard />;
     }
   };
 
+  const today = new Intl.DateTimeFormat('fa-IR', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(new Date());
+
   return (
     <div className="min-h-screen bg-gray-50 flex" dir="rtl">
+      <NotificationToast />
+      
       {/* Mobile Overlay */}
       {mobileSidebarOpen && (
         <div
@@ -55,7 +69,7 @@ const App: React.FC = () => {
         {/* Logo */}
         <div className="p-4 border-b border-slate-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0 shadow-lg">
               <i className="fas fa-heartbeat text-white text-lg"></i>
             </div>
             {sidebarOpen && (
@@ -131,7 +145,7 @@ const App: React.FC = () => {
                 <h2 className="text-lg font-bold text-gray-800">
                   {menuItems.find(m => m.id === currentPage)?.label}
                 </h2>
-                <p className="text-xs text-gray-400 hidden sm:block">خوش آمدید، امروز ۱۰ نوبت دارید</p>
+                <p className="text-xs text-gray-400 hidden sm:block">{today}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -148,7 +162,7 @@ const App: React.FC = () => {
               {/* Date */}
               <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
                 <i className="fas fa-calendar-alt"></i>
-                <span>۱۰ مهر ۱۴۰۳</span>
+                <span>{today}</span>
               </div>
             </div>
           </div>
@@ -167,6 +181,14 @@ const App: React.FC = () => {
         </footer>
       </div>
     </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <ClinicProvider>
+      <AppContent />
+    </ClinicProvider>
   );
 };
 
