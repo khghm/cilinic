@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useClinic, doctors, departments } from '../context/ClinicContext';
 import { getTodayJalali } from '../hooks/useStore';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const Appointments: React.FC = () => {
   const { appointments, patients, addAppointment, updateAppointment, deleteAppointment, sendReminder } = useClinic();
@@ -11,6 +12,8 @@ const Appointments: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [showFilters, setShowFilters] = useState(false);
+  const isMobile = useIsMobile();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -112,81 +115,96 @@ const Appointments: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-4 md:space-y-6 animate-fadeIn">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">مدیریت نوبت‌دهی</h2>
-          <p className="text-sm text-gray-500 mt-1">مجموع {filteredAppointments.length} نوبت</p>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">مدیریت نوبت‌دهی</h2>
+          <p className="text-xs md:text-sm text-gray-500 mt-1">مجموع {filteredAppointments.length} نوبت</p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setViewMode(viewMode === 'table' ? 'cards' : 'table')}
-            className="border border-gray-200 text-gray-600 px-3 py-2 rounded-xl hover:bg-gray-50 transition-all"
-          >
-            <i className={`fas ${viewMode === 'table' ? 'fa-th-large' : 'fa-list'}`}></i>
-          </button>
+          {!isMobile && (
+            <button
+              onClick={() => setViewMode(viewMode === 'table' ? 'cards' : 'table')}
+              className="border border-gray-200 text-gray-600 px-3 py-2 rounded-xl hover:bg-gray-50 transition-all"
+            >
+              <i className={`fas ${viewMode === 'table' ? 'fa-th-large' : 'fa-list'}`}></i>
+            </button>
+          )}
           <button
             onClick={() => { resetForm(); setShowModal(true); }}
-            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-2"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-sm md:text-base font-medium hover:shadow-lg transition-all flex items-center gap-2"
           >
             <i className="fas fa-plus"></i>
-            نوبت جدید
+            <span className="hidden sm:inline">نوبت جدید</span>
           </button>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-          <div className="lg:col-span-2">
-            <div className="relative">
-              <i className="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-              <input
-                type="text"
-                placeholder="جستجوی بیمار..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pr-9 pl-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+      {/* Search & Filter Toggle */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 md:p-4">
+        <div className="flex gap-2 mb-3 md:mb-0">
+          <div className="flex-1 relative">
+            <i className="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input
+              type="text"
+              placeholder="جستجوی بیمار..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pr-9 pl-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
           </div>
-          <select
-            value={selectedDoctor}
-            onChange={(e) => setSelectedDoctor(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`px-3 py-2 rounded-lg border text-sm flex items-center gap-2 transition-all ${
+              showFilters ? 'bg-blue-50 border-blue-200 text-blue-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
           >
-            <option value="all">همه پزشکان</option>
-            {doctors.map((doc, i) => (
-              <option key={i} value={doc.name}>{doc.name}</option>
-            ))}
-          </select>
-          <select
-            value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">همه بخش‌ها</option>
-            {departments.map((dep, i) => (
-              <option key={i} value={dep}>{dep}</option>
-            ))}
-          </select>
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">همه وضعیت‌ها</option>
-            <option value="scheduled">برنامه‌ریزی شده</option>
-            <option value="completed">تکمیل شده</option>
-            <option value="cancelled">لغو شده</option>
-            <option value="no-show">عدم مراجعه</option>
-          </select>
+            <i className="fas fa-filter"></i>
+            <span className="hidden sm:inline">فیلتر</span>
+          </button>
+        </div>
+
+        {/* Filters - Collapsible on mobile */}
+        <div className={`${showFilters ? 'block' : 'hidden'} md:block mt-3 md:mt-4`}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <select
+              value={selectedDoctor}
+              onChange={(e) => setSelectedDoctor(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">همه پزشکان</option>
+              {doctors.map((doc, i) => (
+                <option key={i} value={doc.name}>{doc.name}</option>
+              ))}
+            </select>
+            <select
+              value={selectedDept}
+              onChange={(e) => setSelectedDept(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">همه بخش‌ها</option>
+              {departments.map((dep, i) => (
+                <option key={i} value={dep}>{dep}</option>
+              ))}
+            </select>
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 sm:col-span-2 lg:col-span-1"
+            >
+              <option value="all">همه وضعیت‌ها</option>
+              <option value="scheduled">برنامه‌ریزی شده</option>
+              <option value="completed">تکمیل شده</option>
+              <option value="cancelled">لغو شده</option>
+              <option value="no-show">عدم مراجعه</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {/* Table View */}
-      {viewMode === 'table' ? (
+      {/* Table View - Desktop Only */}
+      {viewMode === 'table' && !isMobile ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -331,8 +349,8 @@ const Appointments: React.FC = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 md:p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg p-4 md:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-800">
                 {editingId ? 'ویرایش نوبت' : 'ثبت نوبت جدید'}
@@ -355,7 +373,7 @@ const Appointments: React.FC = () => {
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm text-gray-600 mb-1 block">پزشک *</label>
                   <select

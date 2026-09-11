@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useClinic } from '../context/ClinicContext';
 import { formatCurrency, printElement } from '../hooks/useStore';
+import { useIsMobile } from '../hooks/useIsMobile';
 import type { InvoiceItem } from '../data/mockData';
 
 const Billing: React.FC = () => {
@@ -10,6 +11,7 @@ const Billing: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -87,56 +89,56 @@ const Billing: React.FC = () => {
   const invoiceDetail = selectedInvoice ? invoices.find(i => i.id === selectedInvoice) : null;
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-4 md:space-y-6 animate-fadeIn">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">مدیریت صورتحساب</h2>
-          <p className="text-sm text-gray-500 mt-1">مجموع {invoices.length} فاکتور</p>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">مدیریت صورتحساب</h2>
+          <p className="text-xs md:text-sm text-gray-500 mt-1">مجموع {invoices.length} فاکتور</p>
         </div>
         <button
           onClick={() => { resetForm(); setShowModal(true); }}
-          className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-5 py-2.5 rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-2"
+          className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 md:px-5 py-2 md:py-2.5 rounded-xl text-sm md:text-base font-medium hover:shadow-lg transition-all flex items-center gap-2"
         >
           <i className="fas fa-file-invoice-dollar"></i>
-          صدور فاکتور
+          <span className="hidden sm:inline">صدور فاکتور</span>
         </button>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-5">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center flex-shrink-0">
               <i className="fas fa-check-circle text-white"></i>
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-xs text-gray-500">پرداخت شده</p>
-              <p className="text-lg font-bold text-gray-800">{formatCurrency(totalPaid)}</p>
+              <p className="text-sm md:text-lg font-bold text-gray-800 truncate">{formatCurrency(totalPaid)}</p>
               <p className="text-xs text-green-600">{invoices.filter(i => i.status === 'paid').length} فاکتور</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-5">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0">
               <i className="fas fa-clock text-white"></i>
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-xs text-gray-500">در انتظار پرداخت</p>
-              <p className="text-lg font-bold text-gray-800">{formatCurrency(totalPending)}</p>
+              <p className="text-sm md:text-lg font-bold text-gray-800 truncate">{formatCurrency(totalPending)}</p>
               <p className="text-xs text-amber-600">{invoices.filter(i => i.status === 'pending').length} فاکتور</p>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-5">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center flex-shrink-0">
               <i className="fas fa-exclamation-circle text-white"></i>
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-xs text-gray-500">معوقه</p>
-              <p className="text-lg font-bold text-gray-800">{formatCurrency(totalOverdue)}</p>
+              <p className="text-sm md:text-lg font-bold text-gray-800 truncate">{formatCurrency(totalOverdue)}</p>
               <p className="text-xs text-red-600">{invoices.filter(i => i.status === 'overdue').length} فاکتور</p>
             </div>
           </div>
@@ -144,8 +146,8 @@ const Billing: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-        <div className="flex flex-wrap gap-3 items-center">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3 md:p-4">
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
           <div className="flex gap-2 flex-wrap">
             {[
               { value: 'all', label: 'همه' },
@@ -156,7 +158,7 @@ const Billing: React.FC = () => {
               <button
                 key={item.value}
                 onClick={() => setFilterStatus(item.value)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-all ${
                   filterStatus === item.value ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
@@ -164,7 +166,7 @@ const Billing: React.FC = () => {
               </button>
             ))}
           </div>
-          <div className="flex-1 min-w-[200px]">
+          <div className="flex-1">
             <div className="relative">
               <i className="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
               <input
@@ -179,7 +181,55 @@ const Billing: React.FC = () => {
         </div>
       </div>
 
-      {/* Invoices Table */}
+      {/* Invoices - Mobile Cards / Desktop Table */}
+      {isMobile ? (
+        /* Mobile Cards View */
+        <div className="space-y-3">
+          {filteredInvoices.length > 0 ? filteredInvoices.map((invoice) => (
+            <div key={invoice.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="text-sm font-bold text-purple-600">{invoice.id}</p>
+                  <p className="text-base font-medium text-gray-800 mt-1">{invoice.patientName}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{invoice.date}</p>
+                </div>
+                <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${
+                  invoice.status === 'paid' ? 'bg-green-100 text-green-700' :
+                  invoice.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                  'bg-red-100 text-red-700'
+                }`}>
+                  {invoice.status === 'paid' ? 'پرداخت شده' : invoice.status === 'pending' ? 'در انتظار' : 'معوقه'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                <span className="text-lg font-bold text-gray-800">{formatCurrency(invoice.amount)}</span>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => setSelectedInvoice(invoice.id)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg" title="مشاهده">
+                    <i className="fas fa-eye text-sm"></i>
+                  </button>
+                  {invoice.status !== 'paid' && (
+                    <button onClick={() => markAsPaid(invoice.id)} className="p-2 text-green-500 hover:bg-green-50 rounded-lg" title="تأیید پرداخت">
+                      <i className="fas fa-check text-sm"></i>
+                    </button>
+                  )}
+                  <button onClick={() => handleSendInvoiceSMS(invoice)} className="p-2 text-amber-500 hover:bg-amber-50 rounded-lg" title="ارسال پیامک">
+                    <i className="fas fa-comment-sms text-sm"></i>
+                  </button>
+                  <button onClick={() => { if (confirm('حذف فاکتور؟')) deleteInvoice(invoice.id); }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg" title="حذف">
+                    <i className="fas fa-trash text-sm"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )) : (
+            <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+              <i className="fas fa-file-invoice text-4xl text-gray-300 mb-3"></i>
+              <p className="text-gray-400">فاکتوری یافت نشد</p>
+            </div>
+          )}
+        </div>
+      ) : (
+      /* Desktop Table View */
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -248,6 +298,7 @@ const Billing: React.FC = () => {
           </div>
         )}
       </div>
+      )}
 
       {/* Hidden invoice details for printing */}
       {invoices.map(invoice => (
@@ -268,8 +319,8 @@ const Billing: React.FC = () => {
 
       {/* Invoice Detail Modal */}
       {invoiceDetail && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 md:p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg p-4 md:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-800">جزئیات فاکتور {invoiceDetail.id}</h3>
               <button onClick={() => setSelectedInvoice(null)} className="text-gray-400 hover:text-gray-600">
@@ -322,8 +373,8 @@ const Billing: React.FC = () => {
 
       {/* Add Invoice Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3 md:p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg p-4 md:p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-800">{editingId ? 'ویرایش فاکتور' : 'صدور فاکتور جدید'}</h3>
               <button onClick={resetForm} className="text-gray-400 hover:text-gray-600">
@@ -354,7 +405,7 @@ const Billing: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   {formData.items.map((item, index) => (
-                    <div key={index} className="flex gap-2 items-center">
+                    <div key={index} className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
                       <input
                         type="text"
                         value={item.description}
@@ -362,18 +413,20 @@ const Billing: React.FC = () => {
                         className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm"
                         placeholder="شرح خدمات"
                       />
-                      <input
-                        type="number"
-                        value={item.amount || ''}
-                        onChange={(e) => updateItem(index, 'amount', parseInt(e.target.value) || 0)}
-                        className="w-32 border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                        placeholder="مبلغ"
-                      />
-                      {formData.items.length > 1 && (
-                        <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-600 p-1">
-                          <i className="fas fa-times"></i>
-                        </button>
-                      )}
+                      <div className="flex gap-2">
+                        <input
+                          type="number"
+                          value={item.amount || ''}
+                          onChange={(e) => updateItem(index, 'amount', parseInt(e.target.value) || 0)}
+                          className="w-full sm:w-32 border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                          placeholder="مبلغ"
+                        />
+                        {formData.items.length > 1 && (
+                          <button onClick={() => removeItem(index)} className="text-red-400 hover:text-red-600 p-1">
+                            <i className="fas fa-times"></i>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
